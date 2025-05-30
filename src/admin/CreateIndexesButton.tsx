@@ -2,7 +2,7 @@
 
 import SubmitButtonWithStatus from '@/components/SubmitButtonWithStatus';
 import { createPerformanceIndexesAction } from './actions';
-import { toastSuccess, toastError } from '@/toast';
+import { toastSuccess, toastWarning } from '@/toast';
 
 export default function CreateIndexesButton() {
   return (
@@ -12,7 +12,7 @@ export default function CreateIndexesButton() {
           await createPerformanceIndexesAction();
           toastSuccess('Database indexes created successfully');
         } catch (error) {
-          toastError('Failed to create indexes: ' + (error as Error).message);
+          toastWarning('Failed to create indexes: ' + (error as Error).message);
         }
       }}
     >

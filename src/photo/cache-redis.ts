@@ -200,7 +200,7 @@ export const warmUpPhotoCache = async (limit = 50) => {
   
   try {
     // Get recent photos
-    const photos = await getPhotos({ limit, sortBy: 'updatedAt' });
+    const photos = await getPhotos({ limit, sortBy: 'createdAt' });
     
     // Cache them
     await Promise.all(photos.map(photo => setCachedPhoto(photo)));

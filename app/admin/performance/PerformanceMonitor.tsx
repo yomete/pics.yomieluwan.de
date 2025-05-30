@@ -89,34 +89,28 @@ export default function PerformanceMonitor() {
       {data && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ScoreCard
-              title="Total Queries"
-              value={data.performance.queryCount}
-            />
-            <ScoreCard
-              title="Avg Query Time"
-              value={`${data.performance.avgQueryTime.toFixed(2)}ms`}
-            />
-            <ScoreCard
-              title="Cache Hit Rate"
-              value={`${cacheHitRate}%`}
-            />
-            <ScoreCard
-              title="Total Query Time"
-              value={`${(data.performance.totalQueryTime / 1000).toFixed(2)}s`}
-            />
+            <ScoreCard title="Total Queries">
+              <div className="p-4 text-2xl font-bold">{data.performance.queryCount}</div>
+            </ScoreCard>
+            <ScoreCard title="Avg Query Time">
+              <div className="p-4 text-2xl font-bold">{data.performance.avgQueryTime.toFixed(2)}ms</div>
+            </ScoreCard>
+            <ScoreCard title="Cache Hit Rate">
+              <div className="p-4 text-2xl font-bold">{cacheHitRate}%</div>
+            </ScoreCard>
+            <ScoreCard title="Total Query Time">
+              <div className="p-4 text-2xl font-bold">{(data.performance.totalQueryTime / 1000).toFixed(2)}s</div>
+            </ScoreCard>
           </div>
 
           {data.performance.p95QueryTime && (
             <div className="grid grid-cols-2 gap-4">
-              <ScoreCard
-                title="P95 Query Time"
-                value={`${data.performance.p95QueryTime.toFixed(2)}ms`}
-              />
-              <ScoreCard
-                title="P99 Query Time"
-                value={`${data.performance.p99QueryTime?.toFixed(2)}ms`}
-              />
+              <ScoreCard title="P95 Query Time">
+                <div className="p-4 text-2xl font-bold">{data.performance.p95QueryTime.toFixed(2)}ms</div>
+              </ScoreCard>
+              <ScoreCard title="P99 Query Time">
+                <div className="p-4 text-2xl font-bold">{data.performance.p99QueryTime?.toFixed(2)}ms</div>
+              </ScoreCard>
             </div>
           )}
 
@@ -124,33 +118,29 @@ export default function PerformanceMonitor() {
             <>
               <h2 className="text-lg font-semibold mt-6">Database Metrics</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <ScoreCard
-                  title="Active Connections"
-                  value={data.database.database.active_connections}
-                />
-                <ScoreCard
-                  title="DB Cache Hit Rate"
-                  value={`${data.database.cache_hit_ratio.toFixed(1)}%`}
-                />
-                <ScoreCard
-                  title="Live Rows"
-                  value={data.database.photos_table.live_rows}
-                />
-                <ScoreCard
-                  title="Sequential Scans"
-                  value={data.database.photos_table.sequential_scans}
-                />
-                <ScoreCard
-                  title="Index Scans"
-                  value={data.database.photos_table.index_scans}
-                />
-                <ScoreCard
-                  title="Index/Seq Ratio"
-                  value={data.database.photos_table.sequential_scans > 0
-                    ? (data.database.photos_table.index_scans / data.database.photos_table.sequential_scans).toFixed(2)
-                    : 'N/A'
-                  }
-                />
+                <ScoreCard title="Active Connections">
+                  <div className="p-4 text-2xl font-bold">{data.database.database.active_connections}</div>
+                </ScoreCard>
+                <ScoreCard title="DB Cache Hit Rate">
+                  <div className="p-4 text-2xl font-bold">{data.database.cache_hit_ratio.toFixed(1)}%</div>
+                </ScoreCard>
+                <ScoreCard title="Live Rows">
+                  <div className="p-4 text-2xl font-bold">{data.database.photos_table.live_rows}</div>
+                </ScoreCard>
+                <ScoreCard title="Sequential Scans">
+                  <div className="p-4 text-2xl font-bold">{data.database.photos_table.sequential_scans}</div>
+                </ScoreCard>
+                <ScoreCard title="Index Scans">
+                  <div className="p-4 text-2xl font-bold">{data.database.photos_table.index_scans}</div>
+                </ScoreCard>
+                <ScoreCard title="Index/Seq Ratio">
+                  <div className="p-4 text-2xl font-bold">
+                    {data.database.photos_table.sequential_scans > 0
+                      ? (data.database.photos_table.index_scans / data.database.photos_table.sequential_scans).toFixed(2)
+                      : 'N/A'
+                    }
+                  </div>
+                </ScoreCard>
               </div>
             </>
           )}

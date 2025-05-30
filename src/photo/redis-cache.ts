@@ -206,7 +206,7 @@ export const invalidatePhotoCache = async (photoId: string): Promise<void> => {
     const pattern = `${PHOTOS_LIST_PREFIX}*`;
     const keys = await redis.keys(pattern);
     if (keys.length > 0) {
-      await Promise.all(keys.map(key => redis.del(key)));
+      await Promise.all(keys.map(key => redis!.del(key)));
       console.log(`[Redis Cache] Invalidated ${keys.length} list caches`);
     }
     
@@ -214,7 +214,7 @@ export const invalidatePhotoCache = async (photoId: string): Promise<void> => {
     const countPattern = `${PHOTOS_COUNT_PREFIX}*`;
     const countKeys = await redis.keys(countPattern);
     if (countKeys.length > 0) {
-      await Promise.all(countKeys.map(key => redis.del(key)));
+      await Promise.all(countKeys.map(key => redis!.del(key)));
     }
   } catch (error) {
     console.error('[Redis Cache] Error invalidating photo cache:', error);
@@ -230,7 +230,7 @@ export const invalidateCacheByType = async (type: string): Promise<void> => {
     const pattern = `*:${CACHE_VERSION}:${type}:*`;
     const keys = await redis.keys(pattern);
     if (keys.length > 0) {
-      await Promise.all(keys.map(key => redis.del(key)));
+      await Promise.all(keys.map(key => redis!.del(key)));
       console.log(`[Redis Cache] Invalidated ${keys.length} ${type} caches`);
     }
   } catch (error) {
@@ -247,13 +247,10 @@ export const clearAllRedisCache = async (): Promise<void> => {
     const pattern = `*:${CACHE_VERSION}:*`;
     const keys = await redis.keys(pattern);
     if (keys.length > 0) {
-      await Promise.all(keys.map(key => redis.del(key)));
+      await Promise.all(keys.map(key => redis!.del(key)));
       console.log(`[Redis Cache] Cleared ${keys.length} cache entries`);
     }
   } catch (error) {
     console.error('[Redis Cache] Error clearing all caches:', error);
   }
 };
-
-// Export the key generation function for use in cache.ts
-export { generatePhotosListKey };

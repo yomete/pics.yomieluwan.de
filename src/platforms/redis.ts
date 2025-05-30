@@ -11,6 +11,4 @@ if (false && HAS_REDIS_STORAGE) {
 
 export { redis };
 
-export const testRedisConnection = () => redis
-  ? redis.get('test')
-  : Promise.reject(false);
+export const testRedisConnection = () => Promise.reject(false);
