@@ -19,6 +19,36 @@ const parameterizeForDb = (field: string) =>
     `REPLACE(${acc}, '${from}', '${to}')`
   , `LOWER(TRIM(${field}))`);
 
+const SEARCH_QUERY_MAX_TERMS = 8;
+
+// Every text field a visitor might remember a photo by
+const SEARCH_DOCUMENT = `CONCAT_WS(' ', ${[
+  'title',
+  'caption',
+  'semantic_description',
+  'ARRAY_TO_STRING(tags, \' \')',
+  'location_name',
+  'film',
+  'recipe_title',
+  'make',
+  'model',
+  'lens_make',
+  'lens_model',
+].join(', ')})`;
+
+const escapeForLike = (term: string) =>
+  term.replace(/[\\%_]/g, char => `\\${char}`);
+
+// Split a search query into unique lowercase terms so that
+// "night tokyo" matches a photo captioned "Tokyo at night"
+export const getSearchTermsFromQuery = (query: string) =>
+  Array.from(new Set(query
+    .toLocaleLowerCase()
+    .split(/\s+/)
+    .map(term => term.trim())
+    .filter(Boolean)))
+    .slice(0, SEARCH_QUERY_MAX_TERMS);
+
 export type GetPhotosOptions = {
   sortBy?: 'createdAt' | 'createdAtAsc' | 'takenAt' | 'priority'
   limit?: number
@@ -83,9 +113,11 @@ export const getWheresFromOptions = (
     wheresValues.push(updatedBefore.toISOString());
   }
   if (query) {
-    // eslint-disable-next-line max-len
-    wheres.push(`CONCAT(title, ' ', caption, ' ', semantic_description) ILIKE $${valuesIndex++}`);
-    wheresValues.push(`%${query.toLocaleLowerCase()}%`);
+    // Each term must appear somewhere in the photo's text, in any order
+    getSearchTermsFromQuery(query).forEach(term => {
+      wheres.push(`${SEARCH_DOCUMENT} ILIKE $${valuesIndex++}`);
+      wheresValues.push(`%${escapeForLike(term)}%`);
+    });
   }
   if (maximumAspectRatio) {
     wheres.push(`aspect_ratio <= $${valuesIndex++}`);
