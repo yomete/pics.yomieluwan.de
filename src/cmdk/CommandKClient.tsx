@@ -85,6 +85,9 @@ const DIALOG_DESCRIPTION = 'For searching photos, views, and settings';
 const LISTENER_KEYDOWN = 'keydown';
 const MINIMUM_QUERY_LENGTH = 2;
 
+// Marks photos the server already matched, so the client filter keeps them
+const KEYWORD_SERVER_MATCH = '__server-match__';
+
 const MAX_HEIGHT = '20rem';
 
 type CommandKItem = {
@@ -245,7 +248,8 @@ export default function CommandKClient({
                 accessory: <IconPhoto size={14} />,
                 items: photos.map(photo => ({
                   label: titleForPhoto(photo),
-                  keywords: getKeywordsForPhoto(photo),
+                  keywords: [KEYWORD_SERVER_MATCH]
+                    .concat(getKeywordsForPhoto(photo)),
                   annotation: <PhotoDate {...{ photo, timezone: undefined }} />,
                   accessory: <PhotoSmall photo={photo} />,
                   path: pathForPhoto({ photo }),
@@ -566,6 +570,7 @@ export default function CommandKClient({
       open={isOpen}
       onOpenChange={setIsOpen}
       filter={(value, search, keywords) => {
+        if (keywords?.includes(KEYWORD_SERVER_MATCH)) { return 1; }
         const searchFormatted = search.trim().toLocaleLowerCase();
         return (
           value.toLocaleLowerCase().includes(searchFormatted) ||
