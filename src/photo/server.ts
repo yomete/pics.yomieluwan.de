@@ -26,7 +26,9 @@ import {
 import { PhotoDbInsert } from '.';
 import { convertExifToFormData } from './form/server';
 
-const IMAGE_WIDTH_RESIZE = 200;
+// Long edge of the image sent to AI for text generation
+const IMAGE_SIZE_AI = 1024;
+const IMAGE_QUALITY_AI = 80;
 const IMAGE_WIDTH_BLUR = 200;
 
 export const extractImageDataFromBlobPath = async (
@@ -143,10 +145,19 @@ const generateBase64 = async (
     .toBuffer()
     .then(data => `data:image/jpeg;base64,${data.toString('base64')}`);
 
-const resizeImage = async (image: ArrayBuffer) => 
-  generateBase64(image, sharp => sharp
-    .resize(IMAGE_WIDTH_RESIZE),
-  );
+// Large enough for AI to see detail. Metadata is not kept,
+// so EXIF (including GPS) is never sent to the AI provider.
+const resizeImage = async (image: ArrayBuffer) =>
+  sharp(image)
+    // Apply EXIF orientation before metadata is dropped
+    .rotate()
+    .resize(IMAGE_SIZE_AI, IMAGE_SIZE_AI, {
+      fit: 'inside',
+      withoutEnlargement: true,
+    })
+    .toFormat('jpeg', { quality: IMAGE_QUALITY_AI })
+    .toBuffer()
+    .then(data => `data:image/jpeg;base64,${data.toString('base64')}`);
 
 const blurImage = async (image: ArrayBuffer) => 
   generateBase64(image, sharp => sharp
