@@ -201,7 +201,7 @@ export default function CommandKClient({
   // Raw query values
   const [queryLiveRaw, setQueryLive] = useState('');
   const [queryDebouncedRaw] =
-    useDebounce(queryLiveRaw, 500, { trailing: true });
+    useDebounce(queryLiveRaw, 250, { trailing: true });
   const isPlaceholderVisible = queryLiveRaw === '';
 
   // Parameterized query values
@@ -212,6 +212,7 @@ export default function CommandKClient({
 
   const [isLoading, setIsLoading] = useState(false);
   const [queriedSections, setQueriedSections] = useState<CommandKSection[]>([]);
+  const latestQueryRef = useRef('');
 
   const { setTheme } = useTheme();
 
@@ -237,10 +238,13 @@ export default function CommandKClient({
   }, [setIsOpen]);
 
   useEffect(() => {
+    latestQueryRef.current = queryDebounced;
     if (queryDebounced.length >= MINIMUM_QUERY_LENGTH && !isPending) {
       setIsLoading(true);
       searchPhotosAction(queryDebounced)
         .then(photos => {
+          // Ignore responses for queries that have since changed
+          if (latestQueryRef.current !== queryDebounced) { return; }
           if (isOpenRef.current) {
             setQueriedSections(photos.length > 0
               ? [{
@@ -248,6 +252,8 @@ export default function CommandKClient({
                 accessory: <IconPhoto size={14} />,
                 items: photos.map(photo => ({
                   label: titleForPhoto(photo),
+                  // Titles and dates can repeat, ids cannot
+                  explicitKey: photo.id,
                   keywords: [KEYWORD_SERVER_MATCH]
                     .concat(getKeywordsForPhoto(photo)),
                   annotation: <PhotoDate {...{ photo, timezone: undefined }} />,
@@ -264,6 +270,7 @@ export default function CommandKClient({
         })
         .catch(e => {
           console.error(e);
+          if (latestQueryRef.current !== queryDebounced) { return; }
           setQueriedSections([]);
           setIsLoading(false);
         });
@@ -271,7 +278,8 @@ export default function CommandKClient({
   }, [queryDebounced, isPending, appText]);
 
   useEffect(() => {
-    if (queryLive === '') {
+    if (queryLive.length < MINIMUM_QUERY_LENGTH) {
+      // Clear results from a longer, earlier query
       setQueriedSections([]);
       setIsLoading(false);
     } else if (queryLive.length >= MINIMUM_QUERY_LENGTH) {
